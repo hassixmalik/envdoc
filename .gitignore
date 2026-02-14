@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+
+# Tooling (local only)
+/.backfill-dates.txt
+/commit-next.sh
+
+# Never commit a real env file from this repo
+.env
+!.env.example

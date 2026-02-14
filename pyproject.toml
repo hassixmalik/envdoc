@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "envdoc"
+version = "0.1.0"
+description = "Keep .env and .env.example honest, and catch secrets before they ship."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Muhammad Hassan Raza" }]
+keywords = ["dotenv", "env", "secrets", "laravel", "devtools", "pre-commit"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Quality Assurance",
+]
+# No runtime dependencies on purpose: this runs in pre-commit hooks and
+# CI, where every extra install is latency and a failure mode.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.1"]
+
+[project.scripts]
+envdoc = "envdoc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+ignore = [
+    "UP006",  # typing.List etc are still needed on 3.9
+    "UP035",
+    "UP045",  # Optional[X]; keeps one spelling across 3.9-3.13
+    "E501",   # long lines are the formatter's business
+]
