@@ -17,9 +17,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, List, Optional
 
+from .classify import secret_reason
 from .parser import EnvFile
 
-__all__ = ["ERROR", "WARNING", "Finding", "Report", "compare"]
+__all__ = ["ERROR", "WARNING", "Finding", "Report", "compare", "leaked_secrets"]
 
 ERROR = "error"
 WARNING = "warning"
@@ -170,3 +171,27 @@ def compare(
         )
 
     return report
+
+
+def leaked_secrets(example: EnvFile) -> List[Finding]:
+    """Real-looking credentials in a file meant to be committed.
+
+    The reverse drift: someone runs ``cp .env .env.example`` to "update the
+    example", commits it, and every secret goes with it. Placeholders and
+    blanks are fine; anything that classifies as a secret is an error.
+    """
+    out: List[Finding] = []
+    for ln in example.entries():
+        reason = secret_reason(ln.key or "", ln.value or "")
+        if reason:
+            out.append(
+                Finding(
+                    "secret-in-example",
+                    ERROR,
+                    f"{ln.key} in .env.example looks like a real secret ({reason})",
+                    key=ln.key,
+                    path=example.path,
+                    line=ln.lineno,
+                )
+            )
+    return out

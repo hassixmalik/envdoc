@@ -103,3 +103,29 @@ class TestReport:
 
     def test_format_without_location(self):
         assert Finding("x", WARNING, "msg").format() == "warning [x] msg"
+
+
+class TestLeakedSecrets:
+    def _example(self, text):
+        from envdoc.parser import parse
+
+        ex = parse(text)
+        ex.path = Path(".env.example")
+        return ex
+
+    def test_blank_and_placeholder_values_are_clean(self):
+        from envdoc.check import leaked_secrets
+
+        ex = self._example("DB_PASSWORD=\nAPI_KEY=<your-key>\nAPP_ENV=local\n")
+        assert leaked_secrets(ex) == []
+
+    def test_copied_env_is_caught(self):
+        from envdoc.check import leaked_secrets
+
+        fake_key = "base64:" + "kQ3Zt0v9cXnRrJ7wq1yPpLmA2sD4fG6hJ8kL0zX1cV3="
+        ex = self._example(f"APP_KEY={fake_key}\nDB_PASSWORD=hunter2\nAPP_ENV=local\n")
+        found = leaked_secrets(ex)
+        assert [f.key for f in found] == ["APP_KEY", "DB_PASSWORD"]
+        assert all(f.code == "secret-in-example" and f.severity == ERROR for f in found)
+        assert "Laravel app key" in found[0].message
+        assert found[1].line == 2
