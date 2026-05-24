@@ -203,14 +203,15 @@ def code_findings(
         # the call looks like.
         required = [] if key in stock else [r for r in uses if r.required]
         first = (required or uses)[0]
-        where = f"{first.path}:{first.line}"
+        # The location is already the finding's file:line prefix; the
+        # message only adds how many other places read the key.
         more = f" (+{len(uses) - 1} more)" if len(uses) > 1 else ""
         if required:
             out.append(
                 Finding(
                     "undocumented-required",
                     ERROR,
-                    f"{key} is read with no fallback at {where}{more} "
+                    f"{key} is read with no fallback{more} "
                     "but is not in .env.example",
                     key=key,
                     path=first.path,
@@ -222,7 +223,7 @@ def code_findings(
                 Finding(
                     "undocumented-optional",
                     WARNING,
-                    f"{key} is read at {where}{more} (with a fallback) "
+                    f"{key} is read with a fallback{more} "
                     "but is not in .env.example",
                     key=key,
                     path=first.path,
