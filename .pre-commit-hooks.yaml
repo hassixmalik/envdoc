@@ -1,0 +1,22 @@
+# For https://pre-commit.com users. In your .pre-commit-config.yaml:
+#
+#   - repo: https://github.com/hassixmalik/envdoc
+#     rev: v0.1.0
+#     hooks:
+#       - id: envdoc
+#
+- id: envdoc
+  name: envdoc - block env files, dumps and leaked secrets
+  entry: envdoc hook run
+  language: python
+  pass_filenames: false
+  always_run: true
+  stages: [pre-commit]
+
+- id: envdoc-check
+  name: envdoc check - .env.example against the code
+  entry: envdoc check --no-code
+  language: python
+  pass_filenames: false
+  files: '(^|/)\.env(\.example)?$'
+  stages: [pre-commit]

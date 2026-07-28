@@ -3,7 +3,7 @@
     envdoc check   compare .env, .env.example and the code
     envdoc sync    bring .env.example up to date, without copying secrets
     envdoc scan    find env files and dumps git would commit
-    envdoc hook    install or remove the pre-commit hook
+    envdoc hook    install, remove or run the pre-commit hook
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Set
 
 from . import __version__
+from . import hook as hookmod
 from .check import Finding, Report, compare, leaked_secrets
 from .parser import EnvFile, ParseError, parse_file
 from .refs import code_findings, find_references, framework_keys
@@ -201,6 +202,22 @@ def cmd_scan(args: argparse.Namespace) -> int:
     return 0 if Report(findings).ok else 1
 
 
+def cmd_hook(args: argparse.Namespace) -> int:
+    try:
+        if args.action == "install":
+            path = hookmod.install(args.root, force=args.force)
+            print(f"envdoc: installed {path}")
+            return 0
+        if args.action == "uninstall":
+            path = hookmod.uninstall(args.root)
+            print(f"envdoc: removed {path}" if path else "envdoc: no hook installed")
+            return 0
+    except hookmod.HookError as exc:
+        print(f"envdoc: {exc}", file=sys.stderr)
+        return 1
+    return hookmod.run(args.root, strict=args.strict)
+
+
 # -- parser --------------------------------------------------------------
 
 
@@ -253,6 +270,15 @@ def build_parser() -> argparse.ArgumentParser:
     pn.add_argument("--depth", type=int, default=6, help="max directory depth (default: 6)")
     fmt(pn)
     pn.set_defaults(func=cmd_scan)
+
+    ph = sub.add_parser("hook", help="install, remove or run the pre-commit hook")
+    ph.add_argument("action", choices=["install", "uninstall", "run"])
+    ph.add_argument("-C", "--root", default=".", help="repository (default: .)")
+    ph.add_argument("--force", action="store_true",
+                    help="install: replace a pre-commit hook envdoc did not write")
+    ph.add_argument("--strict", action="store_true",
+                    help="run: block on .env/.env.example drift too")
+    ph.set_defaults(func=cmd_hook)
 
     return parser
 
