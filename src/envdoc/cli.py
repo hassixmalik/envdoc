@@ -3,6 +3,7 @@
     envdoc check   compare .env, .env.example and the code
     envdoc sync    bring .env.example up to date, without copying secrets
     envdoc scan    find env files and dumps git would commit
+    envdoc init    set up .gitignore, .env.example and the hook in one go
     envdoc hook    install, remove or run the pre-commit hook
 """
 
@@ -18,6 +19,7 @@ from typing import List, Optional, Sequence, Set
 from . import __version__
 from . import hook as hookmod
 from .check import Finding, Report, compare, leaked_secrets
+from .init import init as init_repo
 from .parser import EnvFile, ParseError, parse_file
 from .refs import code_findings, find_references, framework_keys
 from .scan import scan
@@ -202,6 +204,21 @@ def cmd_scan(args: argparse.Namespace) -> int:
     return 0 if Report(findings).ok else 1
 
 
+def cmd_init(args: argparse.Namespace) -> int:
+    try:
+        result = init_repo(args.root, hook=args.hook)
+    except ParseError as exc:
+        print(f"envdoc: {exc}", file=sys.stderr)
+        return 2
+    for line in result.done:
+        print(f"  done:    {line}")
+    for line in result.skipped:
+        print(f"  skipped: {line}")
+    for line in result.problems:
+        print(f"  problem: {line}", file=sys.stderr)
+    return 1 if result.problems else 0
+
+
 def cmd_hook(args: argparse.Namespace) -> int:
     try:
         if args.action == "install":
@@ -270,6 +287,12 @@ def build_parser() -> argparse.ArgumentParser:
     pn.add_argument("--depth", type=int, default=6, help="max directory depth (default: 6)")
     fmt(pn)
     pn.set_defaults(func=cmd_scan)
+
+    pi = sub.add_parser("init", help="set up .gitignore, .env.example and the hook")
+    pi.add_argument("-C", "--root", default=".", help="repository (default: .)")
+    pi.add_argument("--no-hook", dest="hook", action="store_false",
+                    help="skip installing the pre-commit hook")
+    pi.set_defaults(func=cmd_init)
 
     ph = sub.add_parser("hook", help="install, remove or run the pre-commit hook")
     ph.add_argument("action", choices=["install", "uninstall", "run"])

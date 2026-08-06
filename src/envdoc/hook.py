@@ -30,7 +30,7 @@ from .check import ERROR, Finding, Report, compare, leaked_secrets
 from .parser import parse
 from .scan import is_dump_file, is_env_file
 
-__all__ = ["MARKER", "HookError", "check_staged", "install", "uninstall"]
+__all__ = ["MARKER", "HookError", "check_staged", "hook_path", "install", "is_installed", "uninstall"]
 
 MARKER = "# envdoc pre-commit hook"
 
@@ -69,6 +69,16 @@ def _repo_root(start: Path) -> Path:
     if proc.returncode != 0:
         raise HookError(f"{start} is not inside a git repository")
     return Path(proc.stdout.decode().strip())
+
+
+def hook_path(start: str | Path = ".") -> Path:
+    """Where the pre-commit hook lives, honouring core.hooksPath."""
+    return _hooks_dir(_repo_root(Path(start))) / "pre-commit"
+
+
+def is_installed(start: str | Path = ".") -> bool:
+    target = hook_path(start)
+    return target.exists() and MARKER in target.read_text(encoding="utf-8", errors="replace")
 
 
 def install(start: str | Path = ".", *, force: bool = False) -> Path:
