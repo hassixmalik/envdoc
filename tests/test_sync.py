@@ -51,7 +51,7 @@ class TestPlacement:
         example = "APP_NAME=\n\nDB_HOST=\nDB_PORT=\n\nMAIL_MAILER=\n"
         r = run("APP_NAME=x\nDB_HOST=x\nDB_PORT=1\nDB_SSLMODE=require\nMAIL_MAILER=log\n", example)
         lines = r.text.splitlines()
-        assert lines.index("DB_SSLMODE=") == lines.index("DB_PORT=") + 1
+        assert lines.index("DB_SSLMODE=require") == lines.index("DB_PORT=") + 1
         assert APPENDED_MARKER not in r.text
 
     def test_unrelated_key_goes_to_a_marked_tail(self):

@@ -45,6 +45,18 @@ class TestCheckStaged:
         assert codes(report) == ["staged-env-file"]
         assert not report.ok
 
+    def test_advice_differs_for_force_added_files(self, repo):
+        (repo / ".gitignore").write_text(".env\n")
+        (repo / ".env").write_text("A=1\n")
+        git(repo, "add", "-f", ".env")
+        msg = check_staged(repo)[0].findings[0].message
+        assert "force-added" in msg
+
+    def test_advice_for_never_ignored_files(self, repo):
+        (repo / ".env").write_text("A=1\n")
+        git(repo, "add", ".env")
+        assert "add it to .gitignore" in check_staged(repo)[0].findings[0].message
+
     def test_blocks_a_staged_dump(self, repo):
         (repo / "prod.sql").write_text("x\n")
         git(repo, "add", "prod.sql")

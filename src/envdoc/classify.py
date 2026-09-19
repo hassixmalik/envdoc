@@ -76,6 +76,9 @@ _PUBLISHABLE_WORDS = {
     "public", "private", "s3", "phpredis", "predis", "lax", "strict",
     "utf8mb4", "utf8mb4_unicode_ci", "tls", "ssl", "bcrypt", "argon2id",
     "en", "en_us", "utc",
+    # SSL/TLS modes (libpq and MySQL)
+    "disable", "allow", "prefer", "require", "verify-ca", "verify-full",
+    "preferred", "required", "verify_ca", "verify_identity",
 }
 _LOCAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "::1", "host.docker.internal"}
 _PLACEHOLDER_RE = re.compile(
@@ -132,7 +135,7 @@ def secret_reason(key: str, value: str) -> Optional[str]:
     # A sensitive name with a non-trivial value is worth flagging even when
     # the value itself is unremarkable - 'hunter2' is still a password.
     if secret_key_name(key) and v.lower() not in _PUBLISHABLE_WORDS and len(v) >= 4:
-        return f"value set for sensitive-looking key {key}"
+        return "sensitive key name with a value set"
 
     return None
 

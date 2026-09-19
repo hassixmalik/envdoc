@@ -117,3 +117,8 @@ class TestPublishable:
     )
     def test_specific_or_secret_values_are_withheld(self, key, value):
         assert not publishable(key, value)
+
+
+@pytest.mark.parametrize("mode", ["require", "verify-full", "disable", "REQUIRED"])
+def test_ssl_modes_are_publishable(mode):
+    assert publishable("DB_SSLMODE", mode)

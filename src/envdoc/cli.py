@@ -130,8 +130,12 @@ def cmd_check(args: argparse.Namespace) -> int:
 
     if args.code:
         refs = find_references(root)
+        # A key already reported as missing-in-example has the same fix -
+        # add it to the example - so do not report it a second time.
+        already = {f.key for f in report.findings if f.code == "missing-in-example"}
         report.extend(
-            code_findings(
+            f
+            for f in code_findings(
                 refs,
                 example,
                 include_optional=args.optional,
@@ -139,6 +143,7 @@ def cmd_check(args: argparse.Namespace) -> int:
                 ignore_keys=ignore,
                 framework=framework_keys(root),
             )
+            if f.key not in already
         )
 
     report = report.without(args.skip or [])

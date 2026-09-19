@@ -154,3 +154,14 @@ class TestTopLevel:
     def test_subcommand_required(self):
         with pytest.raises(SystemExit):
             main([])
+
+
+class TestDeduplication:
+    def test_key_missing_from_example_and_read_by_code_is_reported_once(self, tmp_path, capsys):
+        (tmp_path / ".env").write_text("STRIPE_SECRET=x\n")
+        (tmp_path / ".env.example").write_text("\n")
+        (tmp_path / "config").mkdir()
+        (tmp_path / "config" / "billing.php").write_text("<?php env('STRIPE_SECRET');")
+        main(["check", "-C", str(tmp_path), "--format", "json"])
+        data = json.loads(capsys.readouterr().out)
+        assert [d["code"] for d in data] == ["missing-in-example"]

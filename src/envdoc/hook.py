@@ -144,12 +144,20 @@ def check_staged(start: str | Path = ".", *, strict: bool = False) -> Tuple[Repo
     for rel in staged:
         path = Path(rel)
         if is_env_file(path):
+            # Advice depends on how it got here: forced past an ignore rule,
+            # or never ignored in the first place.
+            forced = _git(repo, "check-ignore", "-q", "--no-index", rel).returncode == 0
+            fix = (
+                "it is ignored but was force-added"
+                if forced
+                else "add it to .gitignore"
+            )
             report.add(
                 Finding(
                     "staged-env-file",
                     ERROR,
-                    "env file is staged for commit - unstage it with "
-                    f"'git restore --staged {rel}' and add it to .gitignore",
+                    f"env file is staged for commit ({fix}) - unstage it with "
+                    f"'git restore --staged {rel}'",
                     path=path,
                 )
             )
