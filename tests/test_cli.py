@@ -43,6 +43,21 @@ class TestCheck:
         assert main(["check", "-C", str(tmp_path)]) == 1
         assert "envdoc sync" in capsys.readouterr().err
 
+    def test_project_without_env_configuration_passes(self, tmp_path, capsys):
+        """Regression: a repo that never uses env vars used to fail check."""
+        (tmp_path / "app.py").write_text("print('hello')\n")
+        assert main(["check", "-C", str(tmp_path)]) == 0
+        assert "nothing to check" in capsys.readouterr().err
+
+    def test_required_reads_without_any_example_fail(self, tmp_path, capsys):
+        (tmp_path / "app.py").write_text("import os\nos.environ['DATABASE_URL']\n")
+        assert main(["check", "-C", str(tmp_path)]) == 1
+        assert "DATABASE_URL" in capsys.readouterr().err
+
+    def test_optional_reads_without_example_pass(self, tmp_path):
+        (tmp_path / "app.py").write_text("import os\nos.getenv('DEBUG')\n")
+        assert main(["check", "-C", str(tmp_path)]) == 0
+
     def test_runs_without_env_like_on_ci(self, tmp_path, capsys):
         (tmp_path / ".env.example").write_text("APP_ENV=\n")
         (tmp_path / "config").mkdir()

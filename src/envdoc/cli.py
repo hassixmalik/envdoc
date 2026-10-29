@@ -99,6 +99,50 @@ def _summary(report: Report) -> str:
 # -- commands ------------------------------------------------------------
 
 
+def _no_example(args: argparse.Namespace, root: Path, env, ignore: Set[str]) -> int:
+    """Decide what a missing .env.example means.
+
+    * a .env exists - the example should too: error, and sync can build it;
+    * no .env, but code reads variables with no fallback - error, those
+      need documenting somewhere;
+    * no .env and nothing required - the project does not use env
+      configuration, so there is nothing to check.
+    """
+    if env is not None:
+        print(
+            f"envdoc: {args.env} exists but {args.example} does not - "
+            "create it with 'envdoc sync'",
+            file=sys.stderr,
+        )
+        return 1
+
+    needed: List[str] = []
+    if args.code:
+        stock = framework_keys(root)
+        needed = sorted(
+            {
+                r.key
+                for r in find_references(root)
+                if r.required and r.key not in stock and r.key not in ignore
+            }
+        )
+    if needed:
+        shown = ", ".join(needed[:5]) + (f" (+{len(needed) - 5} more)" if len(needed) > 5 else "")
+        print(
+            f"envdoc: no {args.example}, but the code reads {len(needed)} variable(s) "
+            f"with no fallback: {shown}",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not args.quiet:
+        print(
+            f"envdoc: no {args.env}, {args.example} or required env reads - nothing to check",
+            file=sys.stderr,
+        )
+    return 0
+
+
 def cmd_check(args: argparse.Namespace) -> int:
     root = Path(args.root)
     env_path = root / args.env
@@ -113,11 +157,7 @@ def cmd_check(args: argparse.Namespace) -> int:
         return 2
 
     if example is None:
-        print(
-            f"envdoc: no {args.example} in {root} - create one with 'envdoc sync'",
-            file=sys.stderr,
-        )
-        return 1
+        return _no_example(args, root, env, ignore)
 
     report = Report()
     if env is not None:
