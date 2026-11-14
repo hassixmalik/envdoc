@@ -1,7 +1,7 @@
 # For https://pre-commit.com users. In your .pre-commit-config.yaml:
 #
 #   - repo: https://github.com/hassixmalik/envdoc
-#     rev: v0.1.0
+#     rev: v0.1.1
 #     hooks:
 #       - id: envdoc
 #

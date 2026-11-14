@@ -14,7 +14,7 @@ filter or suppress by code rather than by matching message text.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Iterable, List, Optional
 
 from .classify import secret_reason
@@ -38,7 +38,9 @@ class Finding:
     def location(self) -> str:
         if self.path is None:
             return ""
-        return f"{self.path}:{self.line}" if self.line else str(self.path)
+        # Forward slashes on every OS: stable output for CI annotations and tests.
+        p = self.path.as_posix() if isinstance(self.path, PurePath) else str(self.path)
+        return f"{p}:{self.line}" if self.line else p
 
     def format(self) -> str:
         loc = self.location()

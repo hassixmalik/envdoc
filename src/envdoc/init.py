@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import List
 
 from . import hook as hookmod
+from ._io import write_exact
 from .parser import parse_file
 from .sync import sync
 
@@ -88,7 +89,7 @@ def init(root: str | Path = ".", *, hook: bool = True) -> InitResult:
         result.skipped.append(".env.example already exists (use 'envdoc sync' to update it)")
     elif env_path.exists():
         res = sync(parse_file(env_path), None)
-        example_path.write_text(res.text, encoding="utf-8", newline="")
+        write_exact(example_path, res.text)
         withheld = sum(1 for c in res.changes if c.action == "added-blank")
         result.done.append(
             f"created .env.example with {len(res.changes)} key(s), "

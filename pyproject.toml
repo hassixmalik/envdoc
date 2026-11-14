@@ -3,8 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "envdoc"
-version = "0.1.0"
+# Published as envdoc-cli (the name envdoc is taken on PyPI). The command is still `envdoc`.
+name = "envdoc-cli"
+version = "0.1.1"
 description = "Keep .env and .env.example honest, and catch secrets before they ship."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,6 +23,12 @@ classifiers = [
 # No runtime dependencies on purpose: this runs in pre-commit hooks and
 # CI, where every extra install is latency and a failure mode.
 dependencies = []
+
+[project.urls]
+Homepage = "https://zippedsauce.dev/projects/envdoc/"
+Source = "https://github.com/hassixmalik/envdoc"
+Issues = "https://github.com/hassixmalik/envdoc/issues"
+Changelog = "https://github.com/hassixmalik/envdoc/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "ruff>=0.1"]
