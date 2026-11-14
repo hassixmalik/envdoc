@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Published to PyPI as `envdoc-cli` (`pip install envdoc-cli`). The command is still `envdoc`.
+- Release workflow: publishing a GitHub release builds and uploads to PyPI with trusted publishing.
+- README: demo, project page link and install from PyPI.
+
 ## 0.1.0
 
 First release.

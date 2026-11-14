@@ -1,6 +1,17 @@
 # envdoc
 
-Keep `.env` and `.env.example` honest, and catch secrets before they ship.
+**Keep `.env` and `.env.example` honest, and catch secrets before they ship.**
+
+<p>
+  <a href="https://zippedsauce.dev/projects/envdoc/?ref=envdoc"><strong>Project page</strong></a> ·
+  <a href="#install">Install</a> ·
+  <a href="./CHANGELOG.md">Changelog</a>
+</p>
+
+![envdoc check finds three problems, envdoc sync fixes two without copying secrets](./docs/demo.gif)
+
+> **Privacy.** envdoc runs entirely on your machine. It never sends anything anywhere, and its reports name keys and
+> reasons, never values.
 
 ```console
 $ envdoc check
@@ -30,6 +41,13 @@ is never ignored, and `git add .` picks it up.
 ## Install
 
 ```bash
+pip install envdoc-cli
+```
+
+The package is `envdoc-cli` on PyPI (the name `envdoc` belongs to an unrelated project); the command is `envdoc`.
+To install the latest unreleased code instead:
+
+```bash
 pip install git+https://github.com/hassixmalik/envdoc.git
 ```
 
@@ -39,8 +57,6 @@ Or from a clone:
 git clone https://github.com/hassixmalik/envdoc.git
 cd envdoc && pip install .
 ```
-
-Not on PyPI yet.
 
 ## Quick start
 
@@ -174,7 +190,7 @@ With [pre-commit](https://pre-commit.com):
 
 ```yaml
 - repo: https://github.com/hassixmalik/envdoc
-  rev: v0.1.0
+  rev: v0.1.1
   hooks:
     - id: envdoc
 ```
@@ -198,7 +214,7 @@ actually have installed.
 ## Using it in CI
 
 ```yaml
-- run: pip install git+https://github.com/hassixmalik/envdoc.git
+- run: pip install envdoc-cli
 - run: envdoc check --format github
 ```
 
@@ -222,3 +238,10 @@ actually have installed.
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <a href="https://zippedsauce.dev/?ref=envdoc"><img src="https://zippedsauce.dev/badges/made-by-zippedsauce.svg" alt="made by zippedsauce" height="28"></a><br>
+  <sub>Made by <a href="https://zippedsauce.dev/?ref=envdoc">zippedsauce</a> · small, free tools · <a href="https://zippedsauce.dev/#catalog">more tools</a></sub>
+</p>
