@@ -18,6 +18,7 @@ from typing import List, Optional, Sequence, Set
 
 from . import __version__
 from . import hook as hookmod
+from ._io import write_exact
 from .check import Finding, Report, compare, leaked_secrets
 from .init import init as init_repo
 from .parser import EnvFile, ParseError, parse_file
@@ -230,7 +231,7 @@ def cmd_sync(args: argparse.Namespace) -> int:
         print(f"\nenvdoc: dry run - {args.example} not written")
         return 0
 
-    example_path.write_text(result.text, encoding="utf-8", newline="")
+    write_exact(example_path, result.text)
     print(f"envdoc: updated {example_path} ({len(result.changes)} change(s))")
     return 0
 
